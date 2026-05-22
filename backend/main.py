@@ -10,7 +10,7 @@ from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from pipeline import run_research_pipeline
+from backend.pipeline import run_research_pipeline
 
 # =========================================
 # FASTAPI CONFIG

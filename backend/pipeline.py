@@ -1,4 +1,4 @@
-from AAgents import (
+from backend.AAgents import (
     write_chain,
     critic_chain,
     query_planner_chain
@@ -7,7 +7,7 @@ from AAgents import (
 import logging
 import time
 
-from tools import web_Search, scrape_url
+from backend.tools import web_Search, scrape_url
 
 # ==========================
 # Logging Config

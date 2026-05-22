@@ -12,7 +12,7 @@ from langchain.agents import create_react_agent
 
 from langchain_core.prompts import PromptTemplate
 
-from tools import web_Search, scrape_url
+from backend.tools import web_Search, scrape_url
 
 from langchain_core.prompts import PromptTemplate
 
