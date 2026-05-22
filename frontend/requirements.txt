@@ -1,0 +1,7 @@
+streamlit
+requests
+streamlit-webrtc
+torchvision
+python-dotenv
+python-docx
+reportlab
