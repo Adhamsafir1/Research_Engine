@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Hero from './components/Hero';
 import Dashboard from './components/Dashboard';
+import VoiceAgent from './components/VoiceAgent';
 import './index.css';
 
 const INITIAL_SSE_STATE = {
@@ -25,8 +27,8 @@ const INITIAL_SSE_STATE = {
 
 export default function App() {
   const [topic, setTopic] = useState('');
-  const [view, setView] = useState('hero'); // 'hero' | 'dashboard'
   const [sseState, setSseState] = useState(INITIAL_SSE_STATE);
+  const navigate = useNavigate();
 
   const abortControllerRef = useRef(null);
   const sourceCounterRef = useRef(0);
@@ -34,7 +36,7 @@ export default function App() {
 
   const handleStartResearch = async (searchTopic) => {
     setTopic(searchTopic);
-    setView('dashboard');
+    navigate('/dashboard');
     setSseState({
       ...INITIAL_SSE_STATE,
       statusText: 'Planning research strategy...',
@@ -221,18 +223,25 @@ export default function App() {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-    setView('hero');
+    navigate('/');
     setTopic('');
     setSseState(INITIAL_SSE_STATE);
   };
 
   return (
-    <>
-      {view === 'hero' ? (
-        <Hero onSearch={handleStartResearch} />
-      ) : (
+    <Routes>
+      <Route path="/" element={
+        <Hero
+          onSearch={handleStartResearch}
+          onOpenVoiceAgent={() => navigate('/voice-agent')}
+        />
+      } />
+      <Route path="/voice-agent" element={
+        <VoiceAgent onBack={() => navigate('/')} />
+      } />
+      <Route path="/dashboard" element={
         <Dashboard topic={topic} onNewResearch={handleNewResearch} sseState={sseState} />
-      )}
-    </>
+      } />
+    </Routes>
   );
 }

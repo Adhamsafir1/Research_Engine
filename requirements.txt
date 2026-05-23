@@ -3,8 +3,9 @@ langchain
 langchain-core
 langchain-community
 langchain-google-genai
+langchain-mistralai
 
-# Tooling & Scrapy
+# Tooling & Scraping
 tavily-python
 beautifulsoup4
 requests
@@ -15,22 +16,26 @@ langgraph
 python-dotenv
 fastapi
 uvicorn
-streamlit
-streamlit-webrtc
 python-multipart
+
+# Database
 redis
 asyncpg
 sqlalchemy
 chromadb
 qdrant-client
+
+# Voice
+deepgram-sdk
+
+# AI Providers
 openai
-elevenlabs
-cartesia
-whisper
-torchvision
+google-generativeai
+
+# Document parsing
 playwright
 unstructured
 
 # Utilities
 pydantic
-langchain-mistralai
+numpy

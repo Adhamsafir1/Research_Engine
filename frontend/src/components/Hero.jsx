@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { SearchIcon, ArrowRightIcon } from './Icons';
+import { SearchIcon, ArrowRightIcon, MicIcon } from './Icons';
 import ThemeToggle from './ThemeToggle';
+import VoiceButton from './VoiceButton';
 
-export default function Hero({ onSearch }) {
+export default function Hero({ onSearch, onOpenVoiceAgent }) {
   const [query, setQuery] = useState('');
 
   const handleSubmit = (e) => {
@@ -14,14 +15,23 @@ export default function Hero({ onSearch }) {
 
   const handleHintClick = (topic) => {
     setQuery(topic);
-    // Focus search input? We can do it using a ref if necessary, but the submit takes care of it.
-    // Automatically submit when hint is clicked
     onSearch(topic);
+  };
+
+  const handleVoiceTranscription = (text) => {
+    setQuery(text);
+    if (text.trim().length >= 3) {
+      onSearch(text.trim());
+    }
   };
 
   return (
     <section id="hero" className="hero">
       <div className="hero-actions">
+        <button className="btn-voice-agent" onClick={onOpenVoiceAgent} title="Voice Agent">
+          <MicIcon />
+          <span>Voice Agent</span>
+        </button>
         <ThemeToggle />
       </div>
       <div className="hero-content">
@@ -50,6 +60,7 @@ export default function Hero({ onSearch }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
+              <VoiceButton onTranscription={handleVoiceTranscription} />
               <button type="submit" id="search-btn" className="search-submit">
                 <ArrowRightIcon />
               </button>
@@ -80,3 +91,4 @@ export default function Hero({ onSearch }) {
     </section>
   );
 }
+

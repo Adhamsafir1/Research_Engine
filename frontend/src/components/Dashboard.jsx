@@ -14,7 +14,8 @@ import {
   QualityIcon,
   WarningIcon,
   EyeIcon,
-  SearchIcon
+  SearchIcon,
+  VolumeIcon,
 } from './Icons';
 
 export default function Dashboard({ topic, onNewResearch, sseState }) {
@@ -33,7 +34,35 @@ export default function Dashboard({ topic, onNewResearch, sseState }) {
   } = sseState;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [ttsPlaying, setTtsPlaying] = useState(false);
   const reportRef = useRef(null);
+
+  const handleReadAloud = async () => {
+    if (ttsPlaying) return;
+    const summaryText = completionStats || 'Research complete.';
+    setTtsPlaying(true);
+    try {
+      const res = await fetch('/api/v1/voice/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: `Research complete. ${summaryText}` }),
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.onended = () => {
+          setTtsPlaying(false);
+          URL.revokeObjectURL(url);
+        };
+        audio.play();
+      } else {
+        setTtsPlaying(false);
+      }
+    } catch {
+      setTtsPlaying(false);
+    }
+  };
 
   // Auto-scroll to report when it becomes available
   useEffect(() => {
@@ -207,6 +236,15 @@ export default function Dashboard({ topic, onNewResearch, sseState }) {
                 <h4>Research Complete</h4>
                 <p id="completion-stats">{completionStats}</p>
               </div>
+              <button
+                className={`btn-read-aloud ${ttsPlaying ? 'playing' : ''}`}
+                onClick={handleReadAloud}
+                disabled={ttsPlaying}
+                title="Read aloud"
+              >
+                <VolumeIcon />
+                <span>{ttsPlaying ? 'Playing...' : 'Read Aloud'}</span>
+              </button>
             </div>
           )}
 

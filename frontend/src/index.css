@@ -1243,3 +1243,539 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+
+/* ============================================================
+   VOICE BUTTON
+   ============================================================ */
+.voice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: var(--transition);
+  position: relative;
+  overflow: visible;
+}
+
+.voice-btn svg {
+  width: 18px;
+  height: 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.voice-btn:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: var(--accent-light);
+}
+
+/* Listening state */
+.voice-btn--listening {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.voice-btn--listening:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+}
+
+/* Pulse ring behind mic when listening */
+.voice-btn__pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 16px;
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  animation: voicePulse 1.5s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes voicePulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+/* Processing state */
+.voice-btn--processing {
+  pointer-events: none;
+}
+
+.voice-btn__spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent-light);
+  border-radius: 50%;
+  animation: voiceSpin 0.7s linear infinite;
+}
+
+@keyframes voiceSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   READ ALOUD BUTTON (Completion Banner)
+   ============================================================ */
+.btn-read-aloud {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: var(--radius-sm);
+  background: rgba(52, 211, 153, 0.08);
+  color: var(--green);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.btn-read-aloud svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-read-aloud:hover {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.btn-read-aloud.playing {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-read-aloud:disabled {
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   RESPONSIVE VOICE ADJUSTMENTS
+   ============================================================ */
+@media (max-width: 768px) {
+  .voice-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .btn-read-aloud span {
+    display: none;
+  }
+}
+
+/* ============================================================
+   HERO — VOICE AGENT NAV BUTTON
+   ============================================================ */
+.btn-voice-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--accent-light);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-voice-agent svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-voice-agent:hover {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+}
+
+/* ============================================================
+   VOICE AGENT PAGE
+   ============================================================ */
+.voice-agent {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Top Bar */
+.va-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.va-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.03);
+  color: var(--text-dim);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.va-back-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.va-back-btn:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: var(--accent-light);
+}
+
+.va-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Messages Area */
+.va-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+}
+
+/* Empty State */
+.va-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  opacity: 0.5;
+}
+
+.va-empty-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.va-empty-icon svg {
+  width: 28px;
+  height: 28px;
+  color: var(--accent-light);
+}
+
+.va-empty h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.va-empty p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  max-width: 360px;
+  line-height: 1.6;
+}
+
+/* Message Bubbles */
+.va-message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: slideInUp 0.3s ease-out;
+}
+
+.va-message--user {
+  align-items: flex-end;
+}
+
+.va-message--assistant {
+  align-items: flex-start;
+}
+
+.va-message--system {
+  align-items: center;
+}
+
+.va-message-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+.va-message-text {
+  max-width: 85%;
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.va-message--user .va-message-text {
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.va-message--assistant .va-message-text {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+  backdrop-filter: blur(8px);
+}
+
+.va-message--system .va-message-text {
+  background: rgba(251, 146, 60, 0.08);
+  border: 1px solid rgba(251, 146, 60, 0.2);
+  color: var(--orange);
+  font-size: 0.82rem;
+  border-radius: 12px;
+}
+
+/* Bottom Controls */
+.va-controls {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 0 0.5rem;
+}
+
+/* Mic Area */
+.va-mic-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.va-mic-btn {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.va-mic-btn svg {
+  width: 28px;
+  height: 28px;
+  position: relative;
+  z-index: 1;
+}
+
+.va-mic-btn:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: var(--accent-light);
+  transform: scale(1.05);
+}
+
+.va-mic-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Listening state */
+.va-mic-btn--listening {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+}
+
+.va-mic-btn--listening:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+/* Pulsing rings when listening */
+.va-mic-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(239, 68, 68, 0.4);
+  animation: vaRingPulse 2s ease-out infinite;
+  pointer-events: none;
+}
+
+.va-mic-ring--2 {
+  animation-delay: 0.6s;
+}
+
+@keyframes vaRingPulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Thinking/speaking spinner */
+.va-mic-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent-light);
+  border-radius: 50%;
+  animation: voiceSpin 0.8s linear infinite;
+}
+
+.va-status-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Text Fallback Input */
+.va-text-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px 6px 4px 18px;
+  transition: var(--transition);
+}
+
+.va-text-input:focus-within {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.va-text-input input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font);
+  font-size: 0.92rem;
+  color: var(--text);
+  padding: 10px 0;
+}
+
+.va-text-input input::placeholder {
+  color: var(--text-muted);
+}
+
+.va-text-input button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.va-text-input button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.va-text-input button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.3);
+}
+
+.va-text-input button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ============================================================
+   VOICE AGENT RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .voice-agent {
+    padding: 1rem;
+  }
+
+  .va-mic-btn {
+    width: 64px;
+    height: 64px;
+  }
+
+  .va-mic-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .va-message-text {
+    max-width: 92%;
+  }
+
+  .btn-voice-agent span {
+    display: none;
+  }
+}

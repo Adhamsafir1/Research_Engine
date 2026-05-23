@@ -6,11 +6,13 @@ import os
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import StreamingResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from backend.pipeline import run_research_pipeline
+from backend.voice.webrtc_server import router as voice_router
+from backend.voice.vapi_router import router as vapi_router
 
 # =========================================
 # FASTAPI CONFIG
@@ -35,12 +37,28 @@ app.add_middleware(
 )
 
 # =========================================
+# VOICE WEBSOCKET ROUTER
+# =========================================
+
+app.include_router(voice_router)
+
+# =========================================
+# VAPI ROUTER
+# =========================================
+app.include_router(vapi_router, prefix="/vapi", tags=["vapi"])
+
+# =========================================
 # STATIC FILES (Premium Web UI)
 # =========================================
 
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    
+    # Vite places assets in a subfolder called "assets"
+    assets_dir = os.path.join(static_dir, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 # =========================================
 # REQUEST SCHEMA
@@ -83,6 +101,28 @@ async def health_check():
         "version": "3.0.0",
         "pipeline": "active",
     }
+
+# =========================================
+# TEXT-TO-SPEECH ENDPOINT
+# =========================================
+
+class TTSRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=5000, description="Text to synthesize")
+
+@app.post("/api/v1/voice/tts")
+async def text_to_speech(request: TTSRequest):
+    """Synthesize text to speech audio using Deepgram TTS."""
+    try:
+        from backend.voice.tts import TextToSpeech
+        tts = TextToSpeech()
+        audio_bytes = await asyncio.to_thread(tts.synthesize, request.text)
+        if not audio_bytes or audio_bytes == b"MOCK_AUDIO_BYTES":
+            raise HTTPException(status_code=503, detail="TTS service unavailable. Check DEEPGRAM_API_KEY.")
+        return Response(content=audio_bytes, media_type="audio/wav")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"TTS failed: {str(e)}")
 
 # =========================================
 # SSE STREAMING RESEARCH ENDPOINT

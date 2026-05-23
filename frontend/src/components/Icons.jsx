@@ -89,3 +89,30 @@ export const QualityIcon = () => (
     <path d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
   </svg>
 );
+
+export const MicIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/>
+    <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+    <line x1="12" y1="19" x2="12" y2="22"/>
+    <line x1="8" y1="22" x2="16" y2="22"/>
+  </svg>
+);
+
+export const MicOffIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="1" y1="1" x2="23" y2="23"/>
+    <path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V5a3 3 0 00-5.94-.6"/>
+    <path d="M17 16.95A7 7 0 015 12v-2m14 0v2c0 .76-.13 1.49-.35 2.17"/>
+    <line x1="12" y1="19" x2="12" y2="22"/>
+    <line x1="8" y1="22" x2="16" y2="22"/>
+  </svg>
+);
+
+export const VolumeIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M15.54 8.46a5 5 0 010 7.07"/>
+    <path d="M19.07 4.93a10 10 0 010 14.14"/>
+  </svg>
+);
