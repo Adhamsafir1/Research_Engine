@@ -86,17 +86,54 @@ pip install -r requirements.txt
 
 ### 2. Configure Environment Variables
 
-**Backend (`.env` in the root folder):**
+You must create **two separate `.env` files** for this project to work properly: one for the backend and one for the frontend.
+
+**1. Backend `.env`** (Create this file at `D:\Research Engine\Research_Engine\.env`)
+This file stores the secret keys used by the Python backend for the research agents, voice features, and databases.
+
 ```env
+# ==========================================
+# REQUIRED CORE APIS
+# ==========================================
+# Main researcher LLM provider
 MISTRAL_API_KEY=your_mistral_key
+
+# Web search tool
 TAVILY_API_KEY=your_tavily_key
+
+# ==========================================
+# OPTIONAL MULTIMODAL & VOICE APIS
+# ==========================================
+# For native WebRTC / Voice Agent endpoints
+GEMINI_API_KEY=your_gemini_key
+GEMINI_MODEL=gemini-2.0-flash
+
+# For native Text-to-Speech / Speech-to-Text
+DEEPGRAM_API_KEY=your_deepgram_key
+ELEVENLABS_API_KEY=your_elevenlabs_key
+
+# Additional LLMs for specialized agents
+OPENAI_API_KEY=your_openai_key       # (Prompt Engineer agent)
+CLAUDE_API_KEY=your_claude_key       # (Academic Retriever agent)
+
+# ==========================================
+# DATABASES & INFRASTRUCTURE (Optional)
+# ==========================================
+POSTGRES_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/research
+REDIS_URL=redis://localhost:6379/0
+VECTOR_STORE=qdrant                  # Or chroma
+QDRANT_URL=http://localhost:6333
+QDRANT_API_KEY=your_qdrant_key
+VECTOR_DIM=1536
 ```
 
-**Frontend (`frontend/.env`):**
+**2. Frontend `.env`** (Create this file at `D:\Research Engine\Research_Engine\frontend\.env`)
+This file stores the public keys used by the React frontend to initialize the WebRTC voice connection.
 ```env
+# Required for the Voice Agent
 VITE_VAPI_PUBLIC_KEY=your_vapi_public_key
 ```
-*(You can get your Vapi public key from the [Vapi Dashboard](https://dashboard.vapi.ai). Ensure you have your desired providers (e.g., Google or OpenAI, ElevenLabs) configured in your Vapi provider settings).*
+*(You can get your Vapi public key from the [Vapi Dashboard](https://dashboard.vapi.ai). Note: Ensure you also have your desired LLM and Voice providers (e.g., Google/OpenAI, ElevenLabs) configured securely in your Vapi provider settings dashboard, as the Voice Agent relies on those to respond).*
 
 ### 3. Install Frontend Dependencies
 
