@@ -7,7 +7,7 @@ from backend.AAgents import (
 import logging
 import time
 
-from backend.tools import web_Search, scrape_url
+from backend.tools import web_Search, scrape_url, academic_Search, scholar_Search, ieee_Search
 
 # ==========================
 # Logging Config
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # Main Pipeline (with SSE streaming support)
 # ==========================
 
-def run_research_pipeline(topic: str, on_event=None) -> dict:
+def run_research_pipeline(topic: str, mode: str = "deepresearch", on_event=None) -> dict:
     """
     Deep Research Pipeline with real-time event streaming.
 
@@ -56,6 +56,7 @@ def run_research_pipeline(topic: str, on_event=None) -> dict:
         "query_plan": {},
         "search_result": "",
         "scrape_result": "",
+        "academic_result": "",
         "report": "",
         "feedback": "",
         "logs": [],
@@ -74,7 +75,12 @@ def run_research_pipeline(topic: str, on_event=None) -> dict:
         print("STEP 1: QUERY PLANNER")
         print("=" * 60)
 
-        emit("planning", {"message": "Analyzing topic and planning research strategy..."})
+        if mode == "scholar":
+            emit("planning", {"message": "Scholar Mode Active: Planning academic research..."})
+        elif mode == "ieee":
+            emit("planning", {"message": "IEEE Mode Active: Planning academic research..."})
+        else:
+            emit("planning", {"message": "Analyzing topic and planning research strategy..."})
 
         planner_start = time.time()
 
@@ -124,29 +130,20 @@ def run_research_pipeline(topic: str, on_event=None) -> dict:
         print("=" * 60)
 
         search_start = time.time()
-
         all_search_results = []
-        all_urls = []  # list of (url, score, title) tuples
+        all_urls = []
+        unique_urls = []
 
-        # Low-value domains that yield little scrapable content
         SKIP_DOMAINS = ['youtube.com', 'facebook.com', 'twitter.com', 'instagram.com', 'tiktok.com', 'linkedin.com']
-
         total_subqueries = min(len(subqueries), 6)
 
         for idx, subquery in enumerate(subqueries[:6], 1):
-
             print(f"\n[SEARCH {idx}/{total_subqueries}] Querying: {subquery}")
             logger.info(f"Searching: {subquery}")
-
-            emit("searching", {
-                "query": subquery,
-                "index": idx,
-                "total": total_subqueries
-            })
-
+            emit("searching", {"query": subquery, "index": idx, "total": total_subqueries})
+            
             try:
                 results = web_Search.invoke(subquery)
-
                 if isinstance(results, list):
                     for item in results:
                         title = item.get("title", "No Title")
@@ -154,46 +151,25 @@ def run_research_pipeline(topic: str, on_event=None) -> dict:
                         content = item.get("content", "No Content")
                         score = item.get("score", 0)
                         published = item.get("published_date", "Unknown")
-
-                        formatted = (
-                            f"Title: {title}\n"
-                            f"URL: {url}\n"
-                            f"Score: {score}\n"
-                            f"Published: {published}\n"
-                            f"Content: {content}\n"
-                        )
+                        formatted = f"Title: {title}\nURL: {url}\nScore: {score}\nPublished: {published}\nContent: {content}\n"
                         all_search_results.append(formatted)
-
                         seen_urls = [u[0] for u in all_urls]
                         is_skip_domain = any(d in url for d in SKIP_DOMAINS)
                         if url and url not in seen_urls and not is_skip_domain:
                             all_urls.append((url, score, title))
-
-                            # Emit each source to frontend
-                            emit("source", {
-                                "title": title,
-                                "url": url,
-                                "score": score
-                            })
-
+                            emit("source", {"title": title, "url": url, "score": score})
                         print(f"  [FOUND] {title} | {url} | score={score}")
-
                 elif isinstance(results, str) and results.strip():
                     all_search_results.append(results)
                     print(f"  [TEXT] {results[:150]}")
-
             except Exception as e:
                 print(f"  [ERROR] Search failed for '{subquery}': {e}")
                 logger.error(f"Search failed for '{subquery}': {e}")
 
         state["search_result"] = "\n\n---\n\n".join(all_search_results)
-
-        # Sort URLs by relevance score (highest first) for smart scraping
         all_urls.sort(key=lambda x: x[1], reverse=True)
         unique_urls = [u[0] for u in all_urls]
-
         search_time = round(time.time() - search_start, 2)
-
         state["logs"].append({
             "agent": "Deep Search",
             "status": "success",
@@ -201,12 +177,92 @@ def run_research_pipeline(topic: str, on_event=None) -> dict:
             "subqueries_run": subqueries[:6],
             "urls_found": len(unique_urls),
         })
-
         print(f"\n[SEARCH] Completed in {search_time}s")
         print(f"[SEARCH] Found {len(unique_urls)} unique URLs")
 
-        if not state["search_result"]:
-            raise Exception("Search returned empty response.")
+        # =====================================
+        # STEP 2.5 — ACADEMIC SEARCH
+        # =====================================
+
+        print("\n" + "=" * 60)
+        print("STEP 2.5: ACADEMIC SEARCH")
+        print("=" * 60)
+
+        active_modes = [m.strip() for m in mode.split(",") if m.strip() and m.strip() != "deepresearch"]
+
+        if "scholar" in active_modes and "ieee" in active_modes:
+            emit("academic_planning", {"message": "Scholar & IEEE Mode: Searching Google Scholar and IEEE Xplore..."})
+        elif "scholar" in active_modes:
+            emit("academic_planning", {"message": "Scholar Mode: Searching Google Scholar..."})
+        elif "ieee" in active_modes:
+            emit("academic_planning", {"message": "IEEE Mode: Searching IEEE Xplore..."})
+        else:
+            emit("academic_planning", {"message": "Searching academic databases..."})
+
+        academic_start = time.time()
+        all_academic_results = []
+        academic_urls = []
+
+        for idx, subquery in enumerate(subqueries[:4], 1):
+            print(f"\n[ACADEMIC SEARCH {idx}/4] Querying: {subquery}")
+            emit("academic_searching", {
+                "query": subquery,
+                "index": idx,
+                "total": 4
+            })
+            
+            modes_to_run = active_modes if active_modes else ["default"]
+            
+            for m in modes_to_run:
+                try:
+                    if m == "scholar":
+                        results = scholar_Search.invoke(subquery)
+                    elif m == "ieee":
+                        results = ieee_Search.invoke(subquery)
+                    else:
+                        results = academic_Search.invoke(subquery)
+
+                    if isinstance(results, list):
+                        for item in results:
+                            title = item.get("title", "No Title")
+                            url = item.get("url", "")
+                            content = item.get("content", "No Content")
+                            platform = item.get("source_platform", "Academic")
+                            
+                            formatted = (
+                                f"Source: {platform}\n"
+                                f"Title: {title}\n"
+                                f"URL: {url}\n"
+                                f"Content: {content}\n"
+                            )
+                            all_academic_results.append(formatted)
+                            
+                            if url and url not in [u[0] for u in academic_urls]:
+                                academic_urls.append((url, item.get("score", 0), title))
+                                emit("academic_source", {
+                                    "title": title,
+                                    "url": url,
+                                    "platform": platform,
+                                    "citations": item.get("citation_count", 0)
+                                })
+                except Exception as e:
+                    print(f"  [ERROR] Academic search ({m}) failed for '{subquery}': {e}")
+                    logger.error(f"Academic search ({m}) failed for '{subquery}': {e}")
+
+        state["academic_result"] = "\n\n---\n\n".join(all_academic_results)
+        unique_academic_urls = [u[0] for u in academic_urls]
+        
+        academic_time = round(time.time() - academic_start, 2)
+        
+        state["logs"].append({
+            "agent": "Academic Search",
+            "status": "success",
+            "execution_time": academic_time,
+            "urls_found": len(unique_academic_urls),
+        })
+
+        # Combine URLs for scraping
+        unique_urls = list(dict.fromkeys(unique_urls + unique_academic_urls))
 
         # =====================================
         # STEP 3 — DEEP SCRAPE (Direct Tool Call)
@@ -283,6 +339,9 @@ def run_research_pipeline(topic: str, on_event=None) -> dict:
         research_combined = f"""
 SEARCH RESULTS ({len(all_search_results)} sources found):
 {state["search_result"]}
+
+ACADEMIC RESULTS ({len(all_academic_results)} papers found):
+{state["academic_result"]}
 
 DETAILED SCRAPED CONTENT ({scrape_success} pages analyzed):
 {state["scrape_result"]}

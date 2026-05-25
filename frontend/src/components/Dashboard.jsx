@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import ThemeToggle from './ThemeToggle';
 import { SourceCard, SidebarSourceItem } from './SourceCard';
+import ChatPanel from './ChatPanel';
 import {
   PlusIcon,
   MenuIcon,
@@ -25,6 +27,7 @@ export default function Dashboard({ topic, onNewResearch, sseState }) {
     completedSteps,
     stepDetails,
     sources,
+    academicSources,
     scrapedCount,
     report,
     feedback,
@@ -123,7 +126,7 @@ export default function Dashboard({ topic, onNewResearch, sseState }) {
             <div className="status-right">
               <div className="stat-chip">
                 <BookIcon />
-                <span id="sources-count">{sources.length}</span> sources
+                <span id="sources-count">{sources.length + (academicSources?.length || 0)}</span> sources
               </div>
               <div className="stat-chip">
                 <EyeIcon />
@@ -151,6 +154,15 @@ export default function Dashboard({ topic, onNewResearch, sseState }) {
               isActive={activeStep === 'search'}
               isCompleted={completedSteps.includes('search')}
               icon={<SearchIcon />}
+            />
+            {/* Step: Academic Search */}
+            <StepItem
+              id="academic"
+              label="Academic Search"
+              detail={stepDetails.academic}
+              isActive={activeStep === 'academic'}
+              isCompleted={completedSteps.includes('academic')}
+              icon={<BookIcon />}
             />
             {/* Step: Scrape */}
             <StepItem
@@ -190,8 +202,11 @@ export default function Dashboard({ topic, onNewResearch, sseState }) {
               </h3>
             </div>
             <div id="sources-grid" className="sources-grid">
+              {academicSources && academicSources.map((source, idx) => (
+                <SourceCard key={`acad-${idx}`} source={source} index={idx} />
+              ))}
               {sources.map((source, idx) => (
-                <SourceCard key={idx} source={source} index={idx} />
+                <SourceCard key={`web-${idx}`} source={source} index={idx + (academicSources?.length || 0)} />
               ))}
             </div>
           </div>
@@ -206,7 +221,7 @@ export default function Dashboard({ topic, onNewResearch, sseState }) {
                 </h3>
               </div>
               <article id="report-content" className="report-content glass-card">
-                <ReactMarkdown>{report}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{report}</ReactMarkdown>
               </article>
             </div>
           )}
@@ -221,31 +236,36 @@ export default function Dashboard({ topic, onNewResearch, sseState }) {
                 </h3>
               </div>
               <div id="feedback-content" className="feedback-content glass-card">
-                <ReactMarkdown>{feedback}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{feedback}</ReactMarkdown>
               </div>
             </div>
           )}
 
           {/* Completion Banner */}
           {isComplete && (
-            <div id="completion-banner" className="completion-banner glass-card">
-              <div className="completion-icon">
-                <ShieldCheckIcon />
+            <>
+              <div id="completion-banner" className="completion-banner glass-card">
+                <div className="completion-icon">
+                  <ShieldCheckIcon />
+                </div>
+                <div className="completion-text">
+                  <h4>Research Complete</h4>
+                  <p id="completion-stats">{completionStats}</p>
+                </div>
+                <button
+                  className={`btn-read-aloud ${ttsPlaying ? 'playing' : ''}`}
+                  onClick={handleReadAloud}
+                  disabled={ttsPlaying}
+                  title="Read aloud"
+                >
+                  <VolumeIcon />
+                  <span>{ttsPlaying ? 'Playing...' : 'Read Aloud'}</span>
+                </button>
               </div>
-              <div className="completion-text">
-                <h4>Research Complete</h4>
-                <p id="completion-stats">{completionStats}</p>
-              </div>
-              <button
-                className={`btn-read-aloud ${ttsPlaying ? 'playing' : ''}`}
-                onClick={handleReadAloud}
-                disabled={ttsPlaying}
-                title="Read aloud"
-              >
-                <VolumeIcon />
-                <span>{ttsPlaying ? 'Playing...' : 'Read Aloud'}</span>
-              </button>
-            </div>
+              
+              {/* Follow-up Chat Panel */}
+              <ChatPanel report={report} />
+            </>
           )}
 
           {/* Error Banner */}
@@ -267,12 +287,15 @@ export default function Dashboard({ topic, onNewResearch, sseState }) {
           <div className="sidebar-header">
             <h3>All Sources</h3>
             <span id="sidebar-source-count" className="sidebar-count">
-              {sources.length}
+              {sources.length + (academicSources?.length || 0)}
             </span>
           </div>
           <div id="sidebar-sources-list" className="sidebar-sources-list">
+            {academicSources && academicSources.map((source, idx) => (
+              <SidebarSourceItem key={`acad-sidebar-${idx}`} source={source} />
+            ))}
             {sources.map((source, idx) => (
-              <SidebarSourceItem key={idx} source={source} />
+              <SidebarSourceItem key={`web-sidebar-${idx}`} source={source} />
             ))}
           </div>
         </aside>

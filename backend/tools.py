@@ -127,6 +127,92 @@ def web_Search(
 
         return []
 
+# ==========================
+# Academic Search Tool
+# ==========================
+
+@tool
+def academic_Search(query: str) -> list:
+    """
+    Search multiple academic
+    platforms for papers,
+    journals, and scholarly
+    articles.
+    """
+    from backend.academic_tools import search_all_academic
+    try:
+        results = search_all_academic(query, limit_per_source=3)
+        academic_results = []
+        for r in results:
+            academic_results.append({
+                "title": r.get("title", "No Title"),
+                "url": r.get("url", ""),
+                "content": f"Abstract: {r.get('abstract', '')}\nAuthors: {', '.join(r.get('authors', []))}\nYear: {r.get('year', '')}",
+                "score": 0.9, # Mock high score for academic sources
+                "published_date": str(r.get("year", "Unknown")),
+                "source_platform": r.get("source_platform", "Academic"),
+                "citation_count": r.get("citation_count", 0),
+            })
+        return academic_results
+    except Exception as e:
+        print(f"Academic search failed: {str(e)}")
+        return []
+
+# ==========================
+# Scholar Search Tool
+# ==========================
+
+@tool
+def scholar_Search(query: str) -> list:
+    """
+    Search Google Scholar for academic papers.
+    """
+    from backend.academic_tools import search_google_scholar
+    try:
+        results = search_google_scholar(query, limit=5)
+        academic_results = []
+        for r in results:
+            academic_results.append({
+                "title": r.get("title", "No Title"),
+                "url": r.get("url", ""),
+                "content": f"Abstract: {r.get('abstract', '')}\nAuthors: {', '.join(r.get('authors', []))}\nYear: {r.get('year', '')}",
+                "score": 0.9, 
+                "published_date": str(r.get("year", "Unknown")),
+                "source_platform": r.get("source_platform", "Google Scholar"),
+                "citation_count": r.get("citation_count", 0),
+            })
+        return academic_results
+    except Exception as e:
+        print(f"Scholar search failed: {str(e)}")
+        return []
+
+# ==========================
+# IEEE Search Tool
+# ==========================
+
+@tool
+def ieee_Search(query: str) -> list:
+    """
+    Search IEEE Xplore for technical papers.
+    """
+    from backend.academic_tools import search_ieee
+    try:
+        results = search_ieee(query, limit=5)
+        academic_results = []
+        for r in results:
+            academic_results.append({
+                "title": r.get("title", "No Title"),
+                "url": r.get("url", ""),
+                "content": f"Abstract: {r.get('abstract', '')}\nAuthors: {', '.join(r.get('authors', []))}\nYear: {r.get('year', '')}",
+                "score": 0.9, 
+                "published_date": str(r.get("year", "Unknown")),
+                "source_platform": r.get("source_platform", "IEEE"),
+                "citation_count": r.get("citation_count", 0),
+            })
+        return academic_results
+    except Exception as e:
+        print(f"IEEE search failed: {str(e)}")
+        return []
 
 # ==========================
 # Scraper Tool

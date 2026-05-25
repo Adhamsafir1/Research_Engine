@@ -5,7 +5,7 @@ function extractDomain(url) {
     const host = new URL(url).hostname;
     return host.replace(/^www\./, '');
   } catch {
-    return url;
+    return url || '';
   }
 }
 
@@ -16,13 +16,14 @@ function scoreClass(score) {
 }
 
 export function SourceCard({ source, index }) {
-  const domain = extractDomain(source.url);
-  const sc = scoreClass(source.score);
-  const scorePercent = Math.round((source.score || 0) * 100);
+  const isAcademic = !!source.platform;
+  const domain = isAcademic ? source.platform : extractDomain(source.url);
+  const sc = scoreClass(source.score || 0.9);
+  const scorePercent = Math.round((source.score || 0.9) * 100);
 
   return (
     <a
-      className="source-card"
+      className={`source-card glass-card ${isAcademic ? 'academic-source-card' : ''}`}
       href={source.url}
       target="_blank"
       rel="noopener noreferrer"
@@ -30,17 +31,26 @@ export function SourceCard({ source, index }) {
     >
       <div className="source-card-top">
         <span className="source-card-title">{source.title || domain}</span>
-        <span className={`source-score ${sc}`}>{scorePercent}%</span>
+        {isAcademic && source.citations > 0 ? (
+          <span className={`source-score ${sc}`}>{source.citations} cit.</span>
+        ) : (
+          <span className={`source-score ${sc}`}>{scorePercent}%</span>
+        )}
       </div>
       <div className="source-card-domain">
-        <img
-          className="favicon"
-          src={`https://www.google.com/s2/favicons?sz=32&domain=${domain}`}
-          alt=""
-          width="14"
-          height="14"
-          loading="lazy"
-        />
+        {!isAcademic && (
+          <img
+            className="favicon"
+            src={`https://www.google.com/s2/favicons?sz=32&domain=${domain}`}
+            alt=""
+            width="14"
+            height="14"
+            loading="lazy"
+          />
+        )}
+        {isAcademic && (
+          <span style={{ fontSize: '14px', marginRight: '6px' }}>🎓</span>
+        )}
         <span>{domain}</span>
       </div>
     </a>
@@ -48,11 +58,12 @@ export function SourceCard({ source, index }) {
 }
 
 export function SidebarSourceItem({ source }) {
-  const domain = extractDomain(source.url);
+  const isAcademic = !!source.platform;
+  const domain = isAcademic ? source.platform : extractDomain(source.url);
 
   return (
     <a
-      className="sidebar-source-item"
+      className={`sidebar-source-item ${isAcademic ? 'academic' : ''}`}
       href={source.url}
       target="_blank"
       rel="noopener noreferrer"
@@ -62,3 +73,4 @@ export function SidebarSourceItem({ source }) {
     </a>
   );
 }
+

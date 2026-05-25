@@ -12,11 +12,13 @@ const INITIAL_SSE_STATE = {
   stepDetails: {
     plan: 'Waiting...',
     search: 'Waiting...',
+    academic: 'Waiting...',
     scrape: 'Waiting...',
     write: 'Waiting...',
     critique: 'Waiting...',
   },
   sources: [],
+  academicSources: [],
   scrapedCount: 0,
   report: '',
   feedback: '',
@@ -34,7 +36,7 @@ export default function App() {
   const sourceCounterRef = useRef(0);
   const scrapedCounterRef = useRef(0);
 
-  const handleStartResearch = async (searchTopic) => {
+  const handleStartResearch = async (searchTopic, searchMode = 'deepresearch') => {
     setTopic(searchTopic);
     navigate('/dashboard');
     setSseState({
@@ -56,7 +58,7 @@ export default function App() {
       const response = await fetch('/api/v1/research/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: searchTopic }),
+        body: JSON.stringify({ topic: searchTopic, mode: searchMode }),
         signal: abortController.signal,
       });
 
@@ -151,11 +153,27 @@ export default function App() {
           sourceCounterRef.current += 1;
           next.sources = [...next.sources, event];
           break;
+          
+        case 'academic_searching':
+          setStepCompleted('search');
+          if (next.stepDetails.search === 'Starting searches...') {
+             next.stepDetails.search = 'All web queries completed';
+          }
+          setStepActive('academic');
+          next.statusText = `Academic Search: "${event.query}"`;
+          next.stepDetails.academic = `Query ${event.index}/${event.total}: ${event.query}`;
+          break;
+
+        case 'academic_source':
+          sourceCounterRef.current += 1;
+          next.academicSources = [...next.academicSources, event];
+          break;
 
         case 'scraping':
           setStepCompleted('search');
-          if (next.stepDetails.search === 'Starting searches...') {
-             next.stepDetails.search = 'All queries completed';
+          setStepCompleted('academic');
+          if (next.stepDetails.academic === 'Waiting...') {
+             next.stepDetails.academic = 'All academic queries completed';
           }
           setStepActive('scrape');
           next.statusText = `Scraping sources... (${event.index}/${event.total})`;

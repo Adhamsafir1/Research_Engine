@@ -116,3 +116,24 @@ export const VolumeIcon = () => (
     <path d="M19.07 4.93a10 10 0 010 14.14"/>
   </svg>
 );
+
+export const SendIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="22" y1="2" x2="11" y2="13"/>
+    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+  </svg>
+);
+
+export const SparklesIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/>
+    <path d="M5 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/>
+  </svg>
+);
+
+export const AcademicCapIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
+    <path d="M3 10.09V17a2 2 0 002 2h14a2 2 0 002-2v-6.91"/>
+  </svg>
+);

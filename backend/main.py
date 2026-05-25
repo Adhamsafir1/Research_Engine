@@ -11,8 +11,10 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from backend.pipeline import run_research_pipeline
+from backend.AAgents import chat_chain
 from backend.voice.webrtc_server import router as voice_router
 from backend.voice.vapi_router import router as vapi_router
+from langchain_core.messages import HumanMessage, AIMessage
 
 # =========================================
 # FASTAPI CONFIG
@@ -71,6 +73,16 @@ class ResearchRequest(BaseModel):
         max_length=500,
         description="Research topic to investigate"
     )
+    mode: str = "deepresearch"
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    message: str
+    report: str
+    history: list[ChatMessage] = []
 
 # =========================================
 # SERVE WEB UI
@@ -150,7 +162,7 @@ async def stream_research(request: ResearchRequest):
         """Run the blocking pipeline in a background thread."""
         try:
             result = await asyncio.to_thread(
-                run_research_pipeline, topic, on_event
+                run_research_pipeline, topic, request.mode, on_event
             )
             # Push final state for the non-streaming fallback
             queue.put_nowait({"type": "_result", "data": result})
@@ -205,7 +217,7 @@ async def start_research(request: ResearchRequest):
             )
 
         result = await asyncio.to_thread(
-            run_research_pipeline, topic
+            run_research_pipeline, topic, request.mode
         )
 
         if result.get("status") == "failed":
@@ -242,3 +254,69 @@ async def start_research(request: ResearchRequest):
                 "error": str(e)
             }
         )
+
+# =========================================
+# FOLLOW-UP CHAT ENDPOINTS
+# =========================================
+
+@app.post("/api/v1/research/chat")
+async def chat_endpoint(request: ChatRequest):
+    """
+    Non-streaming endpoint for follow-up conversation.
+    """
+    try:
+        history = []
+        for msg in request.history:
+            if msg.role == "user":
+                history.append(HumanMessage(content=msg.content))
+            else:
+                history.append(AIMessage(content=msg.content))
+                
+        response = chat_chain.invoke({
+            "message": request.message,
+            "report": request.report,
+            "history": history
+        })
+        
+        return {"reply": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/research/chat/stream")
+async def stream_chat(request: ChatRequest):
+    """
+    Streaming endpoint for follow-up conversation.
+    """
+    try:
+        history = []
+        for msg in request.history:
+            if msg.role == "user":
+                history.append(HumanMessage(content=msg.content))
+            else:
+                history.append(AIMessage(content=msg.content))
+                
+        async def event_generator():
+            try:
+                for chunk in chat_chain.stream({
+                    "message": request.message,
+                    "report": request.report,
+                    "history": history
+                }):
+                    event = {"type": "token", "content": chunk}
+                    yield f"data: {json.dumps(event)}\n\n"
+                    
+                yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            except Exception as e:
+                yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+        return StreamingResponse(
+            event_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

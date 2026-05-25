@@ -5,24 +5,36 @@ import VoiceButton from './VoiceButton';
 
 export default function Hero({ onSearch, onOpenVoiceAgent }) {
   const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState({ scholar: false, ieee: false });
+
+  const getModeString = () => {
+    const active = [];
+    if (filters.scholar) active.push('scholar');
+    if (filters.ieee) active.push('ieee');
+    return active.length > 0 ? active.join(',') : 'deepresearch';
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (query.trim().length >= 3) {
-      onSearch(query.trim());
+      onSearch(query.trim(), getModeString());
     }
   };
 
   const handleHintClick = (topic) => {
     setQuery(topic);
-    onSearch(topic);
+    onSearch(topic, getModeString());
   };
 
   const handleVoiceTranscription = (text) => {
     setQuery(text);
     if (text.trim().length >= 3) {
-      onSearch(text.trim());
+      onSearch(text.trim(), getModeString());
     }
+  };
+
+  const toggleFilter = (filterName) => {
+    setFilters(prev => ({ ...prev, [filterName]: !prev[filterName] }));
   };
 
   return (
@@ -65,6 +77,46 @@ export default function Hero({ onSearch, onOpenVoiceAgent }) {
                 <ArrowRightIcon />
               </button>
             </div>
+          </div>
+          <div className="search-options" style={{ display: 'flex', gap: '10px', marginTop: '16px', justifyContent: 'center' }}>
+            <button 
+              type="button" 
+              className={`mode-toggle-btn ${filters.scholar ? 'active' : ''}`}
+              onClick={() => toggleFilter('scholar')}
+              style={{ 
+                padding: '6px 14px', 
+                borderRadius: '20px', 
+                border: filters.scholar ? '1px solid transparent' : '1px solid var(--border-color)', 
+                background: filters.scholar ? 'var(--primary-color, #3b82f6)' : 'transparent', 
+                color: filters.scholar ? '#fff' : 'var(--text-secondary)', 
+                cursor: 'pointer', 
+                fontSize: '0.85rem',
+                fontWeight: '500',
+                transition: 'all 0.2s ease',
+                boxShadow: filters.scholar ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none'
+              }}
+            >
+              Scholar Mode
+            </button>
+            <button 
+              type="button" 
+              className={`mode-toggle-btn ${filters.ieee ? 'active' : ''}`}
+              onClick={() => toggleFilter('ieee')}
+              style={{ 
+                padding: '6px 14px', 
+                borderRadius: '20px', 
+                border: filters.ieee ? '1px solid transparent' : '1px solid var(--border-color)', 
+                background: filters.ieee ? 'var(--primary-color, #3b82f6)' : 'transparent', 
+                color: filters.ieee ? '#fff' : 'var(--text-secondary)', 
+                cursor: 'pointer', 
+                fontSize: '0.85rem',
+                fontWeight: '500',
+                transition: 'all 0.2s ease',
+                boxShadow: filters.ieee ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none'
+              }}
+            >
+              IEEE Mode
+            </button>
           </div>
           <div className="search-hints">
             <span

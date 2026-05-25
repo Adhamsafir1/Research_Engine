@@ -1,6 +1,9 @@
 from langchain.agents import create_agent
 from langchain_mistralai import ChatMistralAI
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    MessagesPlaceholder
+)
 from langchain_core.output_parsers import (
     StrOutputParser, 
     JsonOutputParser 
@@ -283,7 +286,8 @@ CRITICAL OUTPUT REQUIREMENTS:
 - Your report MUST be at minimum 3000 words. Short reports are UNACCEPTABLE.
 - Every section MUST contain at least 3-4 detailed paragraphs with specific facts, figures, and quotes from the research.
 - You MUST include at least 2 markdown tables with real data, comparisons, or metrics extracted from the sources.
-- You MUST cite source URLs inline using markdown links: [Source Name](URL).
+- You MUST cite source URLs and academic papers inline using markdown links or author-year format: [Source Name](URL) or (Smith et al., 2024).
+- You MUST distinctly reference academic findings vs general web findings. Prioritize academic papers for scientific or factual claims.
 - You MUST use dynamic, creative section headers (NOT generic like "Background" — instead use vivid titles like "The Silicon Substrate: How Technology Reshaped the Industry").
 - You MUST include bullet-point lists of key statistics, data points, and expert quotes.
 - If sources disagree, you MUST analyze the contradictions in detail.
@@ -335,8 +339,8 @@ MANDATORY STRUCTURE (adapt headers to be dynamic and topic-relevant):
 - Synthesize the 5 most important insights
 - Actionable implications for stakeholders
 
-## 8. Sources & References
-- List ALL source URLs referenced in the report
+## 8. Academic & Web Sources
+- List ALL source URLs and academic papers referenced in the report. Separate them into "Academic Papers" and "Web Sources" if possible.
 
 REMEMBER: Minimum 3000 words. Be EXHAUSTIVE. Every section needs deep, specific content with data and citations. DO NOT write a surface-level summary.""")
 ])
@@ -359,6 +363,7 @@ critic_prompt = ChatPromptTemplate.from_messages([
         - factuality
         - completeness
         - hallucination risk
+        - proper use of academic vs web sources
         """
     ),
     (
@@ -387,6 +392,27 @@ critic_prompt = ChatPromptTemplate.from_messages([
     )
 ])
 critic_chain = critic_prompt | llm | StrOutputParser()
+
+# ==========================
+# FOLLOW-UP CHAT CHAIN
+# ==========================
+
+chat_prompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        """You are a helpful research assistant. A deep research report has been generated for the user.
+        Answer the user's follow-up questions based ONLY on the report content below.
+        If the answer isn't in the report, say so clearly (do not hallucinate outside information).
+        Cite specific sections and sources from the report when answering.
+        
+        Research Report Context:
+        {report}"""
+    ),
+    MessagesPlaceholder(variable_name="history"),
+    ("human", "{message}")
+])
+
+chat_chain = chat_prompt | llm | StrOutputParser()
 
 
 # ==========================

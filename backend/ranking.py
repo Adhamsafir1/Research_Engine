@@ -9,17 +9,20 @@ TRUST_SCORES = {
 
     "nature.com": 10,
     "gov": 10,
+    "pubmed.ncbi.nlm.nih.gov": 10,
 
     "ieee.org": 9,
     "mit.edu": 9,
     "reuters.com": 9,
+    "sciencedirect.com": 9,
+    "scholar.google.com": 9,
+    "semanticscholar.org": 9,
 
     "bbc.com": 8,
     "arxiv.org": 8,
+    "crossref.org": 8,
 
     "forbes.com": 7,
-
-    "sciencedirect.com": 9
 }
 
 
